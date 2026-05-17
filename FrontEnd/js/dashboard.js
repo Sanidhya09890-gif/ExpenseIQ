@@ -97,7 +97,7 @@ const fetchGroups = async () => {
 
         const response = await fetch(
 
-            'http://localhost:3000/api/groups',
+            'https://expenseiq-backend-xkmu.onrender.com/api/groups',
 
             {
                 method: 'GET',
@@ -287,7 +287,7 @@ if (groupForm) {
 
                 const response = await fetch(
 
-                    'http://localhost:3000/api/groups/create',
+                    'https://expenseiq-backend-xkmu.onrender.com/api/groups/create',
 
                     {
                         method: 'POST',
@@ -388,7 +388,7 @@ async function deleteGroup(groupId) {
 
         const response = await fetch(
 
-            `http://localhost:3000/api/groups/delete/${groupId}`,
+            `https://expenseiq-backend-xkmu.onrender.com/api/groups/delete/${groupId}`,
 
             {
                 method: 'DELETE',

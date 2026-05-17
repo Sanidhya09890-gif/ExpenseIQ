@@ -93,7 +93,7 @@ const fetchExpenses = async () => {
 
         const response = await fetch(
 
-            `http://localhost:3000/api/expenses/group/${groupId}`,
+            `https://expenseiq-backend-xkmu.onrender.com/api/expenses/group/${groupId}`,
 
             {
                 method: 'GET',
@@ -263,7 +263,7 @@ if (expenseForm) {
                 const response =
                     await fetch(
 
-                        'http://localhost:3000/api/expenses/add',
+                        'https://expenseiq-backend-xkmu.onrender.com/api/expenses/add',
 
                         {
                             method: 'POST',

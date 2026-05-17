@@ -10,7 +10,7 @@ loginForm.addEventListener(
 
         try {
             const response = await fetch(
-                'http://localhost:3000/api/auth/login',
+                'https://expenseiq-backend-xkmu.onrender.com/api/auth/login',
                 {
                     method: 'POST',
                     headers: {
