@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>ExpenseIQ Dashboard</title>
+
+    <link rel="stylesheet" href="./css/style.css">
+
+</head>
+
+<body>
+
+    <!-- GRID BACKGROUND -->
+    <div class="bg-grid"></div>
+
+    <!-- BIG BACKGROUND TEXT -->
+    <div class="bg-text">
+        ExpenseIQ
+    </div>
+
+    <!-- FLOATING LOGOUT BUTTON -->
+    <button
+        class="logout-btn"
+        onclick="logout()"
+    >
+        Logout
+    </button>
+
+
+    <div class="dashboard-layout">
+
+
+        <!-- LEFT SIDE -->
+        <div class="hero-side">
+
+            <h2 class="main-slogan">
+
+                Clear accounts.
+                <br>
+
+                <span>
+                    Clean friendships.
+                </span>
+
+            </h2>
+
+            <p class="sub-slogan">
+
+                Take the awkwardness out of
+                sharing costs.
+
+                Effortless expense tracking
+                for trips, roommates,
+                and everyday groups.
+
+            </p>
+
+        </div>
+
+
+        <!-- RIGHT SIDE -->
+        <div class="card-side">
+
+            <div class="dashboard-card">
+
+
+                <!-- WELCOME -->
+             <div class="welcome-box" id="welcomeText">
+    <span class="welcome-label">Welcome!!</span>
+    <br>
+    Guest 👋
+</div>
+
+                <!-- GROUP FORM -->
+                <form
+                    id="groupForm"
+                    class="group-form"
+                >
+
+                    <input
+                        type="text"
+                        id="groupName"
+                        placeholder="Enter Group Name"
+                        class="group-input"
+                        required
+                    >
+
+
+                    <!-- CATEGORY OPTIONS -->
+                    <div class="category-options">
+
+                        <div class="category-card">
+                            🏨
+                            <p>Hotel</p>
+                        </div>
+
+                        <div class="category-card">
+                            ✈️
+                            <p>Flight</p>
+                        </div>
+
+                        <div class="category-card">
+                            🍔
+                            <p>Food</p>
+                        </div>
+
+                        <div class="category-card">
+                            ☰
+                            <p>Other</p>
+                        </div>
+
+                    </div>
+
+
+                    <button type="submit">
+                        Create Group
+                    </button>
+
+                </form>
+
+
+                <!-- GROUPS -->
+                <div id="groupsContainer">
+                    
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="./js/dashboard.js"></script>
+
+</body>
+
+</html>

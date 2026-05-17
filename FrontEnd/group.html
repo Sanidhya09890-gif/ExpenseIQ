@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Group
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="./css/style.css"
+    >
+
+</head>
+
+<body>
+
+    <!-- GRID BACKGROUND -->
+    <div class="bg-grid"></div>
+
+
+    <!-- FADED BACKGROUND TEXT -->
+    <div class="bg-text">
+        ExpenseIQ
+    </div>
+
+
+    <!-- LOGOUT -->
+    <button
+        class="logout-btn"
+        onclick="logout()"
+    >
+        Logout
+    </button>
+
+
+    <!-- MAIN CONTAINER -->
+    <div class="app-container">
+
+
+        <!-- LEFT PANEL -->
+        <div class="summary-panel">
+
+
+            <!-- ACTIVE GROUP -->
+            <div class="group-badge">
+
+                Active Group
+
+            </div>
+
+
+            <!-- GROUP TITLE -->
+            <h2
+                class="group-title"
+                id="groupTitle"
+            >
+
+                Group ✈️
+
+            </h2>
+
+
+            <!-- RECENT ACTIVITY -->
+            <div class="recent-activity">
+                <div class="total-spend-badge" style="
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(6, 182, 212, 0.05));
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 24px;
+    text-align: left;
+">
+    <p style="margin: 0; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; color: #94a3b8; font-weight: 600;">
+        Total Group Spend
+    </p>
+    <h2 id="totalGroupSpend" style="margin: 4px 0 0 0; font-size: 2.2rem; font-weight: 800; color: #38bdf8;">
+        ₹0
+    </h2>
+</div>
+
+<h2>Recent Split Log</h2>
+
+
+
+                <!-- EXPENSES WILL LOAD HERE -->
+                <div id="expensesContainer">
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RIGHT PANEL -->
+        <div class="form-panel">
+
+
+            <div class="expense-card">
+
+
+                <h2>
+
+                    Add Expense
+
+                </h2>
+
+
+                <!-- FORM -->
+                <form id="expenseForm">
+
+
+                    <!-- EXPENSE TITLE -->
+                    <div class="input-wrapper">
+
+                        <label>
+
+                            What did you pay for?
+
+                        </label>
+
+                        <input
+                            type="text"
+                            id="expenseTitle"
+                            placeholder="e.g. Dinner, Fuel, Hotel"
+                            class="form-input"
+                            required
+                        >
+
+                    </div>
+
+
+                    <!-- EXPENSE AMOUNT -->
+                    <div class="input-wrapper">
+
+                        <label>
+
+                            Amount
+
+                        </label>
+
+
+                        <div class="currency-input">
+
+                            <span class="currency-symbol">
+
+                                ₹
+
+                            </span>
+
+                            <input
+                                type="number"
+                                id="expenseAmount"
+                                placeholder="0.00"
+                                class="form-input price-field"
+                                required
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- SUBMIT -->
+                    <button
+                        type="submit"
+                        class="add-expense-btn"
+                    >
+
+                        Add Expense
+
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- JS -->
+    <script src="./js/group.js"></script>
+
+</body>
+
+</html>
