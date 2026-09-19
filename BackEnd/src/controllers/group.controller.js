@@ -35,13 +35,14 @@ exports.createGroup = async (req, res) => {
 };
 
 
-// GET ALL GROUPS
+// GET ALL GROUPS OF LOGGED-IN USER
 exports.getGroups = async (req, res) => {
 
     try {
 
-        const groups = await Group.find()
-        .populate('members', 'name email');
+        const groups = await Group.find({
+            createdBy: req.user.id
+        }).populate('members', 'name email');
 
         res.status(200).json({
             groups
@@ -57,12 +58,26 @@ exports.getGroups = async (req, res) => {
 
 };
 
-//Delete Group
+// DELETE GROUP
 exports.deleteGroup = async (req, res) => {
 
     try {
 
         const { groupId } = req.params;
+
+        // CHECK IF GROUP EXISTS AND BELONGS TO THE LOGGED-IN USER
+        const group = await Group.findOne({
+            _id: groupId,
+            createdBy: req.user.id
+        });
+
+        if (!group) {
+
+            return res.status(404).json({
+                message: "Group not found or you are not authorized to delete it"
+            });
+
+        }
 
         // DELETE ALL EXPENSES OF THIS GROUP
         await Expense.deleteMany({

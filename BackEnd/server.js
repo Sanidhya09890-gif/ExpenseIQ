@@ -1,10 +1,13 @@
-const app = require('./src/app');
+const dns = require("node:dns");
 
-const dotenv = require('dotenv');
+// Force Node.js to use public DNS servers
+dns.setServers(["1.1.1.1", "8.8.8.8"]);
 
-const connectDB = require('./src/Config/db');
-
+const dotenv = require("dotenv");
 dotenv.config();
+
+const app = require("./src/app");
+const connectDB = require("./src/Config/db");
 
 const startServer = async () => {
 
@@ -12,7 +15,7 @@ const startServer = async () => {
 
         await connectDB();
 
-        app.listen(3000,() => {
+        app.listen(3000, () => {
 
             console.log("Server running on port 3000");
 
