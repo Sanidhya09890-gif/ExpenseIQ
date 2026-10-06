@@ -2,6 +2,7 @@ const Group = require('../models/group.model');
 const Expense = require('../models/expense.model');
 const GroupInvite = require('../models/groupInvite.model');
 const User = require('../models/user.model');
+const Notification = require('../models/notification.model');
 
 
 // CREATE GROUP
@@ -213,6 +214,14 @@ exports.acceptInvite = async (req, res) => {
         invite.status = 'accepted';
         await invite.save();
 
+        await Notification.create({
+            recipient: invite.invitedBy,
+            type: 'INVITE_ACCEPTED',
+            message: 'Your invitation was accepted',
+            groupId: invite.groupId,
+            relatedUser: invite.invitee
+        });
+
         res.status(200).json({
             message: "Invitation accepted successfully",
             group
@@ -266,6 +275,14 @@ exports.rejectInvite = async (req, res) => {
         // Mark invitation as rejected
         invite.status = 'rejected';
         await invite.save();
+
+        await Notification.create({
+            recipient: invite.invitedBy,
+            type: 'INVITE_REJECTED',
+            message: 'Your invitation was rejected',
+            groupId: invite.groupId,
+            relatedUser: invite.invitee
+        });
 
         res.status(200).json({
             message: "Invitation rejected successfully"

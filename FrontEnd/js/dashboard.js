@@ -3,6 +3,7 @@ const token = localStorage.getItem('token');
 const userName = localStorage.getItem('userName');
 
 
+
 // ===============================
 // PROTECT PAGE
 // ===============================
@@ -12,6 +13,7 @@ if (!token) {
     window.location.href = './login.html';
 
 }
+
 
 
 // ===============================
@@ -27,8 +29,42 @@ const groupForm =
 const welcomeText =
     document.getElementById('welcomeText');
 
+const notificationBtn =
+    document.getElementById('notificationBtn');
+
+const notificationPanel =
+    document.getElementById('notificationPanel');
+
+const notificationClose =
+    document.getElementById('notificationClose');
+
+const notificationList =
+    document.getElementById('notificationList');
+
+const notificationBadge =
+    document.getElementById('notificationBadge');
+
 const groupNameInput =
     document.getElementById('groupName');
+
+
+
+// ===============================
+// NOTIFICATION PANEL
+// ===============================
+
+notificationBtn.addEventListener('click', () => {
+
+    notificationPanel.classList.toggle('show');
+
+});
+
+notificationClose.addEventListener('click', () => {
+
+    notificationPanel.classList.remove('show');
+
+});
+
 
 
 // ===============================
@@ -39,6 +75,7 @@ if (welcomeText) {
 
     welcomeText.innerHTML = `
         <div style="text-align: center; padding: 10px 0;">
+
             <span class="welcome-label" style="
                 text-transform: uppercase; 
                 letter-spacing: 3px; 
@@ -56,11 +93,18 @@ if (welcomeText) {
                 font-weight: 900; 
                 line-height: 1.2;
                 margin: 8px 0 12px 0;
-                background: linear-gradient(135deg, #a78bfa 0%, #38bdf8 50%, #06b6d4 100%);
+                background: linear-gradient(
+                    135deg,
+                    #a78bfa 0%,
+                    #38bdf8 50%,
+                    #06b6d4 100%
+                );
                 -webkit-background-clip: text;
                 -webkit-text-fill-color: transparent;
                 display: block;
-                filter: drop-shadow(0px 2px 8px rgba(139, 92, 246, 0.3));
+                filter: drop-shadow(
+                    0px 2px 8px rgba(139, 92, 246, 0.3)
+                );
             ">
                 Welcome, ${userName ? userName.split(' ')[0] : 'User'}!
             </h2>
@@ -77,15 +121,26 @@ if (welcomeText) {
                 color: #cbd5e1;
                 cursor: pointer;
                 transition: all 0.3s ease;
-            " 
-            onmouseover="this.style.background='rgba(56, 189, 248, 0.15)'; this.style.borderColor='#38bdf8'; this.style.transform='scale(1.05)';" 
-            onmouseout="this.style.background='rgba(255, 255, 255, 0.05)'; this.style.borderColor='rgba(255, 255, 255, 0.1)'; this.style.transform='scale(1)';">
+            "
+            onmouseover="
+                this.style.background='rgba(56, 189, 248, 0.15)';
+                this.style.borderColor='#38bdf8';
+                this.style.transform='scale(1.05)';
+            "
+            onmouseout="
+                this.style.background='rgba(255, 255, 255, 0.05)';
+                this.style.borderColor='rgba(255, 255, 255, 0.1)';
+                this.style.transform='scale(1)';
+            ">
                 <span>Let's smash some bills</span> 🔥
             </div>
+
         </div>
     `;
 
 }
+
+
 
 // ===============================
 // FETCH GROUPS
@@ -112,6 +167,8 @@ const fetchGroups = async () => {
         const data = await response.json();
 
         groupsContainer.innerHTML = '';
+
+
 
         // ===============================
         // NO GROUPS FOUND
@@ -145,6 +202,7 @@ const fetchGroups = async () => {
         }
 
 
+
         // ===============================
         // RENDER GROUPS
         // ===============================
@@ -155,6 +213,7 @@ const fetchGroups = async () => {
                 document.createElement('div');
 
             div.classList.add('group-card');
+
 
 
             // CATEGORY ICON
@@ -191,6 +250,7 @@ const fetchGroups = async () => {
             }
 
 
+
             div.innerHTML = `
 
                 <div class="group-card-top">
@@ -214,6 +274,7 @@ const fetchGroups = async () => {
                 </div>
 
 
+
                 <div class="group-buttons">
 
                     <button
@@ -226,6 +287,7 @@ const fetchGroups = async () => {
                     >
                         Enter
                     </button>
+
 
 
                     <button
@@ -255,6 +317,153 @@ const fetchGroups = async () => {
 };
 
 
+
+// ===============================
+// FETCH NOTIFICATIONS
+// ===============================
+
+const fetchNotifications = async () => {
+
+    try {
+
+        const response = await fetch(
+
+            'https://expenseiq-backend-xkmu.onrender.com/api/notifications',
+
+            {
+                method: 'GET',
+
+                headers: {
+                    authorization: token
+                }
+            }
+
+        );
+
+        const data = await response.json();
+
+        const notifications =
+            data.notifications || [];
+
+
+
+        // ===============================
+        // CLEAR OLD NOTIFICATIONS
+        // ===============================
+
+        notificationList.innerHTML = '';
+
+
+
+        // ===============================
+        // NOTIFICATION BADGE
+        // ===============================
+
+        notificationBadge.textContent =
+            notifications.length;
+
+        notificationBadge.style.display =
+            notifications.length > 0
+                ? 'flex'
+                : 'none';
+
+
+
+        // ===============================
+        // NO NOTIFICATIONS
+        // ===============================
+
+        if (notifications.length === 0) {
+
+            notificationList.innerHTML = `
+                <div class="no-notifications">
+                    No new notifications
+                </div>
+            `;
+
+            return;
+
+        }
+
+
+
+        // ===============================
+        // RENDER NOTIFICATIONS
+        // ===============================
+
+        notifications.forEach((notification) => {
+
+            const notificationCard =
+                document.createElement('div');
+
+            notificationCard.classList.add(
+                'notification-card'
+            );
+
+
+            let title =
+                '🔔 Notification';
+
+
+            if (
+                notification.type ===
+                'INVITE_ACCEPTED'
+            ) {
+
+                title =
+                    '✅ Invitation Accepted';
+
+            }
+
+
+            if (
+                notification.type ===
+                'INVITE_REJECTED'
+            ) {
+
+                title =
+                    '❌ Invitation Rejected';
+
+            }
+
+
+            notificationCard.innerHTML = `
+
+                <div>
+
+                    <strong>
+                        ${title}
+                    </strong>
+
+                    <p>
+                        ${notification.message}
+                    </p>
+
+                </div>
+
+            `;
+
+
+            notificationList.appendChild(
+                notificationCard
+            );
+
+        });
+
+
+    } catch (error) {
+
+        console.log(
+            'Error fetching notifications:',
+            error
+        );
+
+    }
+
+};
+
+
+
 // ===============================
 // CREATE GROUP
 // ===============================
@@ -272,6 +481,8 @@ if (groupForm) {
             const groupName =
                 groupNameInput.value.trim();
 
+
+
             // VALIDATION
             if (!groupName) {
 
@@ -282,6 +493,8 @@ if (groupForm) {
                 return;
 
             }
+
+
 
             try {
 
@@ -319,8 +532,12 @@ if (groupForm) {
 
                 console.log(data);
 
+
+
                 // RESET FORM
                 groupForm.reset();
+
+
 
                 // REFRESH GROUPS
                 fetchGroups();
@@ -338,6 +555,7 @@ if (groupForm) {
 }
 
 
+
 // ===============================
 // OPEN GROUP
 // ===============================
@@ -353,17 +571,22 @@ function openGroup(
         groupId
     );
 
+
+
     // SAVE GROUP NAME
     localStorage.setItem(
         'selectedGroupName',
         groupName
     );
 
+
+
     // REDIRECT
     window.location.href =
         './group.html';
 
 }
+
 
 
 // ===============================
@@ -383,6 +606,8 @@ async function deleteGroup(groupId) {
         return;
 
     }
+
+
 
     try {
 
@@ -405,6 +630,8 @@ async function deleteGroup(groupId) {
 
         console.log(data);
 
+
+
         fetchGroups();
 
     } catch (error) {
@@ -414,6 +641,7 @@ async function deleteGroup(groupId) {
     }
 
 }
+
 
 
 // ===============================
@@ -430,8 +658,11 @@ function logout() {
 }
 
 
+
 // ===============================
 // INITIAL FETCH
 // ===============================
 
 fetchGroups();
+
+fetchNotifications();
