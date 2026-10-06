@@ -10,8 +10,8 @@ exports.signup = async (req, res) => {
 
     try {
 
-        const { name, email, password } = req.body;
-
+        const { username, email, password } = req.body;
+        //email already exists?
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
@@ -21,18 +21,28 @@ exports.signup = async (req, res) => {
             });
 
         }
+        // Check if username already exists
+        const existingUsername = await User.findOne({ username });
+
+        if (existingUsername) {
+            return res.status(400).json({
+                message: "Username already taken"
+            });
+        }
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const user = await User.create({
-            name,
+            username,
             email,
             password: hashedPassword
         });
 
         res.status(201).json({
             message: "User created successfully",
-            user
+            id: user._id,
+            username: user.username,
+            email: user.email
         });
 
     } catch (error) {
@@ -51,28 +61,37 @@ exports.login = async (req, res) => {
 
     try {
 
-        const { email, password } = req.body;
+        const { loginInput, password } = req.body;
 
-        const user = await User.findOne({ email });
+        // Find user by username OR email
+        const user = await User.findOne({
+            $or: [
+                { username: loginInput },
+                { email: loginInput }
+            ]
+        });
 
         if (!user) {
 
             return res.status(400).json({
-                message: "Invalid email or password"
+                message: "Invalid username/email or password"
             });
 
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(
+            password,
+            user.password
+        );
 
         if (!isMatch) {
 
             return res.status(400).json({
-                message: "Invalid email or password"
+                message: "Invalid username/email or password"
             });
 
         }
-      
+
         const token = jwt.sign(
             {
                 id: user._id

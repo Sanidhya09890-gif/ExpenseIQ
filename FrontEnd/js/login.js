@@ -5,7 +5,7 @@ loginForm.addEventListener(
     async (e) => {
         e.preventDefault();
 
-        const email = document.getElementById('email').value;
+        const loginInput = document.getElementById('loginInput').value;
         const password = document.getElementById('password').value;
 
         try {
@@ -16,7 +16,7 @@ loginForm.addEventListener(
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ loginInput, password })
                 }
             );
 
@@ -37,7 +37,7 @@ loginForm.addEventListener(
             // ===============================
             // SAVE USER NAME (Safe & Bulletproof)
             // ===============================
-            const finalName = data.user?.name || data.name || data.username || data.user?.username || 'User';
+            const finalName = data.user?.username || 'User';
             localStorage.setItem('userName', finalName);
 
             // ===============================
