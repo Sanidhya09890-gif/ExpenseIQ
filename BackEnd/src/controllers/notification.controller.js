@@ -8,8 +8,10 @@ exports.getNotifications = async (req, res) => {
 
         const notifications = await Notification.find({
             recipient: req.user.id
-        })
-        .sort({ createdAt: -1 });
+    })
+    .populate('relatedUser', 'name username')
+    .populate('groupId', 'groupName')
+    .sort({ createdAt: -1 });
 
         res.status(200).json({
             notifications
