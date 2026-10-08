@@ -223,6 +223,13 @@ exports.acceptInvite = async (req, res) => {
         invite.status = 'accepted';
         await invite.save();
 
+        // Remove the invitation notification for the invitee
+        await Notification.deleteOne({
+        recipient: invite.invitee,
+        inviteId: invite._id,
+        type: 'INVITE_RECEIVED'
+        });
+
         await Notification.create({
             recipient: invite.invitedBy,
             type: 'INVITE_ACCEPTED',
@@ -284,6 +291,13 @@ exports.rejectInvite = async (req, res) => {
         // Mark invitation as rejected
         invite.status = 'rejected';
         await invite.save();
+
+        // Remove the invitation notification for the invitee
+        await Notification.deleteOne({
+        recipient: invite.invitee,
+        inviteId: invite._id,
+        type: 'INVITE_RECEIVED'
+        });
 
         await Notification.create({
             recipient: invite.invitedBy,
