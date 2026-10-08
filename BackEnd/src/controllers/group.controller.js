@@ -125,6 +125,15 @@ exports.inviteUser = async (req, res) => {
             invitee: invitee._id
         });
 
+        await Notification.create({
+        recipient: invitee._id,
+        type: 'INVITE_RECEIVED',
+        message: 'You received a group invitation',
+        groupId: groupId,
+        relatedUser: req.user.id,
+        inviteId: invite._id
+    });
+
         res.status(201).json({
             message: "Invitation sent successfully",
             invite

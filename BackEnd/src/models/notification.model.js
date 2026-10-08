@@ -12,8 +12,9 @@ const notificationSchema = new mongoose.Schema(
             type: String,
             required: true,
             enum: [
-            'INVITE_ACCEPTED',
-            'INVITE_REJECTED'
+                'INVITE_ACCEPTED',
+                'INVITE_REJECTED',
+                'INVITE_RECEIVED'
             ]
         },
 
@@ -32,6 +33,12 @@ const notificationSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',
             required: true
+        },
+
+        inviteId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'GroupInvite',
+            required: false
         },
 
         isRead: {

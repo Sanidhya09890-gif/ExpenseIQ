@@ -11,6 +11,7 @@ exports.getNotifications = async (req, res) => {
     })
     .populate('relatedUser', 'name username')
     .populate('groupId', 'groupName')
+    .populate('inviteId')
     .sort({ createdAt: -1 });
 
         res.status(200).json({
