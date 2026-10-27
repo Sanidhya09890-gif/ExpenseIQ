@@ -21,7 +21,6 @@ loginForm.addEventListener(
             );
 
             const data = await response.json();
-            console.log("Backend Response:", data);
 
             // If the login request failed on the server side
             if (!response.ok) {

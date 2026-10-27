@@ -18,7 +18,7 @@ exports.addExpense = async (req, res) => {
         // CHECK IF THE GROUP BELONGS TO THE LOGGED-IN USER
         const group = await Group.findOne({
             _id: groupId,
-            createdBy: req.user.id
+            members: req.user.id
         });
 
         if (!group) {
@@ -67,7 +67,7 @@ exports.getGroupExpenses = async (req, res) => {
         // CHECK IF THE GROUP BELONGS TO THE LOGGED-IN USER
         const group = await Group.findOne({
             _id: groupId,
-            createdBy: req.user.id
+            members: req.user.id
         });
 
         if (!group) {
@@ -81,7 +81,7 @@ exports.getGroupExpenses = async (req, res) => {
         const expenses = await Expense.find({
             groupId
         })
-        .populate('paidBy', 'name email')
+        .populate('paidBy', 'username')
         .populate('splitBetween', 'name email');
 
         res.status(200).json({

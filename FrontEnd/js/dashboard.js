@@ -316,6 +316,48 @@ const fetchGroups = async () => {
 
 };
 
+// ===============================
+// FORMAT NOTIFICATION TIME
+// ===============================
+
+const formatNotificationTime = (createdAt) => {
+
+    const notificationTime = new Date(createdAt);
+    const currentTime = new Date();
+
+    const differenceInSeconds =
+        Math.floor(
+            (currentTime - notificationTime) / 1000
+        );
+
+    if (differenceInSeconds < 60) {
+        return 'Just now';
+    }
+
+    const differenceInMinutes =
+        Math.floor(differenceInSeconds / 60);
+
+    if (differenceInMinutes < 60) {
+        return `${differenceInMinutes} min ago`;
+    }
+
+    const differenceInHours =
+        Math.floor(differenceInMinutes / 60);
+
+    if (differenceInHours < 24) {
+        return `${differenceInHours} hr ago`;
+    }
+
+    const differenceInDays =
+        Math.floor(differenceInHours / 24);
+
+    if (differenceInDays === 1) {
+        return 'Yesterday';
+    }
+
+    return notificationTime.toLocaleDateString();
+
+};
 
 
 // ===============================
@@ -393,55 +435,113 @@ const fetchNotifications = async () => {
 
         notifications.forEach((notification) => {
 
-            const notificationCard =
-                document.createElement('div');
+    const notificationCard =
+        document.createElement('div');
 
-            notificationCard.classList.add(
-                'notification-card'
-            );
+    notificationCard.classList.add('notification-card');
 
+    if (notification.type === 'INVITE_ACCEPTED') {
+        notificationCard.classList.add('notification-accepted');
+    }
 
-            let title =
-                '🔔 Notification';
+    if (notification.type === 'INVITE_REJECTED') {
+        notificationCard.classList.add('notification-rejected');
+    }
 
-
-            if (
-                notification.type ===
-                'INVITE_ACCEPTED'
-            ) {
-
-                title =
-                    '✅ Invitation Accepted';
-
-            }
+    if (notification.type === 'INVITE_RECEIVED') {
+        notificationCard.classList.add('notification-invite');
+    }
 
 
-            if (
-                notification.type ===
-                'INVITE_REJECTED'
-            ) {
+            let title = '🔔 Notification';
+            let message = 'You have a new notification';
+            let icon = '🔔';
 
-                title =
-                    '❌ Invitation Rejected';
+            if (notification.type === 'INVITE_ACCEPTED') {
 
-            }
+           title = 'Invitation Accepted';
+           icon = '✓';
 
+        message =
+            `${notification.relatedUser.username} accepted your invite to ${notification.groupId.groupName}`;
 
-            notificationCard.innerHTML = `
+}
 
-                <div>
+if (notification.type === 'INVITE_REJECTED') {
 
-                    <strong>
-                        ${title}
-                    </strong>
+    title = 'Invitation Rejected';
+    icon = '×';
 
-                    <p>
-                        ${notification.message}
-                    </p>
+   message =
+        `${notification.relatedUser.username} rejected your invite to ${notification.groupId.groupName}`;
 
-                </div>
+}
 
-            `;
+if (notification.type === 'INVITE_RECEIVED') {
+
+    title = 'New Group Invitation';
+    icon = '✉';
+
+    message =
+        `${notification.relatedUser.username} invited you to the group ${notification.groupId.groupName}`;
+
+}
+
+const time =
+    formatNotificationTime(notification.createdAt);
+
+    let actionButtons = '';
+
+if (notification.type === 'INVITE_RECEIVED') {
+
+    actionButtons = `
+        <div class="notification-actions">
+
+            <button
+                class="invite-accept-btn"
+                onclick="acceptInvite('${notification.inviteId._id}')"
+            >
+                Accept
+            </button>
+
+            <button
+                class="invite-reject-btn"
+                onclick="rejectInvite('${notification.inviteId._id}')"
+            >
+                Reject
+            </button>
+
+        </div>
+    `;
+
+}
+
+    notificationCard.innerHTML = `
+
+    <div class="notification-icon">
+        ${icon}
+    </div>
+
+    <div class="notification-content">
+
+        <strong>
+            ${title}
+        </strong>
+
+        <p>
+            ${message}
+        </p>
+
+        <span class="notification-time">
+            ${time}
+        </span>
+
+        ${actionButtons}
+
+    </div>
+
+`;
+
 
 
             notificationList.appendChild(
@@ -637,6 +737,102 @@ async function deleteGroup(groupId) {
     } catch (error) {
 
         console.log(error);
+
+    }
+
+}
+
+// ===============================
+// ACCEPT INVITATION
+// ===============================
+
+async function acceptInvite(inviteId) {
+
+    try {
+
+        const response = await fetch(
+            `https://expenseiq-backend-xkmu.onrender.com/api/groups/invites/${inviteId}/accept`,
+            {
+                method: 'POST',
+
+                headers: {
+                    authorization: token
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        console.log(data);
+
+        if (!response.ok) {
+
+            alert(
+                data.message ||
+                'Failed to accept invitation'
+            );
+
+            return;
+        }
+
+        notificationPanel.classList.remove('show');
+
+        await fetchNotifications();
+
+        await fetchGroups();
+
+    } catch (error) {
+
+        console.log(
+            'Error accepting invitation:',
+            error
+        );
+
+    }
+
+}
+
+// ===============================
+// REJECT INVITATION
+// ===============================
+
+async function rejectInvite(inviteId) {
+
+    try {
+
+        const response = await fetch(
+            `https://expenseiq-backend-xkmu.onrender.com/api/groups/invites/${inviteId}/reject`,
+            {
+                method: 'POST',
+
+                headers: {
+                    authorization: token
+                }
+            }
+        );
+
+        const data = await response.json();
+
+        console.log(data);
+
+        if (!response.ok) {
+
+            alert(
+                data.message ||
+                'Failed to reject invitation'
+            );
+
+            return;
+        }
+
+        await fetchNotifications();
+
+    } catch (error) {
+
+        console.log(
+            'Error rejecting invitation:',
+            error
+        );
 
     }
 

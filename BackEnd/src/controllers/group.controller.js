@@ -64,7 +64,7 @@ exports.getGroups = async (req, res) => {
 exports.inviteUser = async (req, res) => {
     try {
         const { groupId } = req.params;
-        const { username } = req.body;
+        const { username, email } = req.body;
 
         // Find the group
         const group = await Group.findById(groupId);
@@ -82,12 +82,20 @@ exports.inviteUser = async (req, res) => {
             });
         }
 
-        // Find the user by username
-        const invitee = await User.findOne({ username });
+       
+        // Find user by username or email
+        const searchValue = (username || email || "").trim();
+
+        const invitee = await User.findOne({
+            $or: [
+                { username: searchValue },
+                { email: searchValue.toLowerCase() }
+            ]
+        });
 
         if (!invitee) {
             return res.status(404).json({
-                message: "User not found"
+                message: "This user is not on ExpenseIQ. Ask them to create an account first."
             });
         }
 

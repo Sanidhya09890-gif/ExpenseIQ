@@ -50,23 +50,47 @@
         <div class="summary-panel">
 
 
-            <!-- ACTIVE GROUP -->
-            <div class="group-badge">
+           
+<!-- GROUP HEADER -->
+<div class="group-header-top">
 
-                Active Group
+    <div class="group-badge">
+        Active Group
+    </div>
 
-            </div>
-
-
-            <!-- GROUP TITLE -->
-            <h2
-                class="group-title"
-                id="groupTitle"
+    <button
+        type="button"
+        id="openInviteModal"
+        class="invite-member-btn"
+    >
+        <span class="invite-icon" aria-hidden="true">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
             >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                <circle cx="10" cy="7" r="4"/>
+                <line x1="19" y1="8" x2="19" y2="14"/>
+                <line x1="22" y1="11" x2="16" y2="11"/>
+            </svg>
+        </span>
+        Invite Member
+    </button>
 
-                Group ✈️
+</div>
 
-            </h2>
+<!-- GROUP TITLE -->
+<h2 class="group-title" id="groupTitle">
+    Group ✈️
+</h2>
+
 
 
             <!-- RECENT ACTIVITY -->
@@ -187,6 +211,97 @@
         </div>
 
     </div>
+
+    
+<!-- INVITE MEMBER MODAL -->
+<div class="invite-modal-overlay" id="inviteModalOverlay">
+
+    <div class="invite-modal" role="dialog" aria-modal="true" aria-labelledby="inviteModalTitle">
+
+        <button
+            type="button"
+            class="invite-modal-close"
+            id="closeInviteModal"
+            aria-label="Close invite dialog"
+        >
+            &times;
+        </button>
+
+        <div class="invite-modal-header">
+            
+<div class="invite-modal-icon" aria-hidden="true">
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="34"
+        height="34"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+    >
+        <path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="10" cy="7" r="4"/>
+        <line x1="19" y1="8" x2="19" y2="14"/>
+        <line x1="22" y1="11" x2="16" y2="11"/>
+    </svg>
+</div>
+
+
+            <div>
+                <h2 id="inviteModalTitle">Invite Member</h2>
+                <p>Add someone to your group</p>
+            </div>
+        </div>
+
+        <form id="inviteMemberForm">
+
+            <label for="inviteUserInput">Username or Email</label>
+
+            <input
+                type="text"
+                id="inviteUserInput"
+                class="form-input invite-user-input"
+                placeholder="Enter username or email"
+                autocomplete="off"
+                required
+            >
+
+            <p class="invite-helper">
+                ⓘ You can enter either a username or an email address.
+            </p>
+
+            <div
+                id="inviteFeedback"
+                class="invite-feedback"
+                role="status"
+                aria-live="polite"
+            ></div>
+
+            <div class="invite-modal-actions">
+                <button
+                    type="button"
+                    id="cancelInviteModal"
+                    class="invite-cancel-btn"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    id="sendInvitationBtn"
+                    class="invite-submit-btn"
+                >
+                    Send Invitation
+                </button>
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
 
 
     <!-- JS -->
