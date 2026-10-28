@@ -13,4 +13,6 @@ router.get(
 );
 
 
+router.patch('/read', authMiddleware, notificationController.markAsRead);
+
 module.exports = router;

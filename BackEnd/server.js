@@ -8,6 +8,8 @@ dotenv.config();
 
 const app = require("./src/app");
 const connectDB = require("./src/Config/db");
+const mongoose = require('mongoose');
+const installShutdown = require('./src/services/serverLifecycle');
 
 const startServer = async () => {
 
@@ -15,15 +17,22 @@ const startServer = async () => {
 
         await connectDB();
 
-        app.listen(3000, () => {
+        const port = Number(process.env.PORT) || 3000;
+        const server = app.listen(port, () => {
 
-            console.log("Server running on port 3000");
+            console.log(`Server running on port ${port}`);
 
+        });
+        installShutdown(server, app, mongoose);
+        server.on('error', () => {
+            console.error('Backend listener failed');
+            process.exit(1);
         });
 
     } catch (error) {
 
-        console.log(error);
+        console.error('Backend startup failed');
+        process.exit(1);
 
     }
 

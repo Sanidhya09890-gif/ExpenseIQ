@@ -16,6 +16,10 @@ const {
 } = require('../controllers/group.controller');
 
 router.post('/create', authMiddleware, createGroup);
+const managementController = require('../controllers/group.controller');
+router.get('/:groupId/members', authMiddleware, managementController.getMembers);
+router.post('/:groupId/leave', authMiddleware, managementController.leaveGroup);
+router.delete('/:groupId/members/:memberId', authMiddleware, managementController.kickMember);
 router.get('/', authMiddleware, getGroups);
 router.post('/:groupId/invite', authMiddleware, inviteUser);
 router.get('/invites', authMiddleware, getPendingInvites);
