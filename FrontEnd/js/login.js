@@ -4,6 +4,9 @@ loginForm.addEventListener(
     'submit',
     async (e) => {
         e.preventDefault();
+        const restore = ExpenseUI.busy(loginForm.querySelector('button[type="submit"]'), 'Signing in...');
+        if (!restore) return;
+        ExpenseUI.formError(loginForm);
 
         const loginInput = document.getElementById('loginInput').value;
         const password = document.getElementById('password').value;
@@ -24,8 +27,7 @@ loginForm.addEventListener(
 
             // If the login request failed on the server side
             if (!response.ok) {
-                alert(data.message || 'Login failed');
-                return;
+                throw new Error(data.message || 'Login failed');
             }
 
             // ===============================
@@ -44,13 +46,13 @@ loginForm.addEventListener(
             // ===============================
             const finalId = data.user?._id || data.userId || data.id || '';
             localStorage.setItem('userId', finalId);
-
-            alert('Login Successful');
             window.location.href = './dashboard.html';
 
         } catch (error) {
             console.error("Login process error:", error);
-            alert("Something went wrong connecting to the server.");
+            ExpenseUI.formError(loginForm, error.message || 'Unable to sign in. Please try again.');
+        } finally {
+            restore();
         }
     }
 );

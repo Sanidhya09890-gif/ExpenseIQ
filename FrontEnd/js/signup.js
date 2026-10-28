@@ -3,6 +3,9 @@ const signupForm = document.getElementById('signupForm');
 signupForm.addEventListener('submit', async (e) => {
 
     e.preventDefault();
+        const restore = ExpenseUI.busy(signupForm.querySelector('button[type="submit"]'), 'Creating account...');
+        if (!restore) return;
+        ExpenseUI.formError(signupForm);
 
     const username = document.getElementById('username').value;
 
@@ -31,16 +34,18 @@ signupForm.addEventListener('submit', async (e) => {
 
         const data = await response.json();
 
-        console.log(data);
+        if (!response.ok) throw new Error(data.message || 'Unable to create account.');
 
-        alert('Signup Successful');
+
 
         window.location.href = './login.html';
 
     } catch (error) {
 
-        console.log(error);
+        ExpenseUI.formError(signupForm, error.message || 'Unable to create account. Please try again.');
 
+    } finally {
+        restore();
     }
 
 });

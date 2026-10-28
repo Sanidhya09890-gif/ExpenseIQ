@@ -22,6 +22,7 @@ if (!token) {
 
 const groupsContainer =
     document.getElementById('groupsContainer');
+const groupCount = document.getElementById('groupCount');
 
 const groupForm =
     document.getElementById('groupForm');
@@ -53,15 +54,56 @@ const groupNameInput =
 // NOTIFICATION PANEL
 // ===============================
 
+let notificationData = [];
+let notificationFetch = null;
+let expiryTimer = null;
+const activityTypes = new Set(['INVITE_ACCEPTED', 'INVITE_REJECTED']);
+function pendingInvitation(notification, now = Date.now()) {
+    return notification.type === 'INVITE_RECEIVED' && Boolean(notification.groupId && notification.inviteId?._id) &&
+        notification.inviteId.status === 'pending' && new Date(notification.inviteId.expiresAt).getTime() > now;
+}
+function updateNotificationBadge() {
+    const count = notificationData.filter(n => pendingInvitation(n) || (activityTypes.has(n.type) && n.isRead !== true)).length;
+    notificationBadge.textContent = String(count);
+    notificationBadge.style.display = count ? 'flex' : 'none';
+    clearTimeout(expiryTimer);
+    const nextExpiry = notificationData.filter(n => pendingInvitation(n)).map(n => new Date(n.inviteId.expiresAt).getTime());
+    if (nextExpiry.length) expiryTimer = setTimeout(() => {
+        updateNotificationBadge();
+        if (notificationPanel.classList.contains('show')) fetchNotifications();
+    }, Math.min(2147483647, Math.max(1, Math.min(...nextExpiry) - Date.now())));
+}
+async function markDisplayedActivityRead(notifications) {
+    if (!notificationPanel.classList.contains('show')) return;
+    const ids = notifications.filter(n => activityTypes.has(n.type) && n.isRead !== true &&
+        typeof n._id === 'string' && /^[a-fA-F0-9]{24}$/.test(n._id)).map(n => n._id);
+    // Sequential bounded batches; the fetch lock covers reading and marking.
+    for (let i = 0; i < ids.length; i += 100) {
+        const batch = [...new Set(ids.slice(i, i + 100))];
+        const response = await fetch('https://expenseiq-backend-xkmu.onrender.com/api/notifications/read', {
+            method: 'PATCH', headers: { 'Content-Type': 'application/json', authorization: token },
+            body: JSON.stringify({ notificationIds: batch })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Unable to mark notifications as read.');
+        for (const notification of notifications) if (batch.includes(notification._id)) notification.isRead = true;
+        updateNotificationBadge();
+    }
+}
+window.addEventListener('focus', () => fetchNotifications());
+
 notificationBtn.addEventListener('click', () => {
 
     notificationPanel.classList.toggle('show');
+    notificationBtn.setAttribute('aria-expanded', String(notificationPanel.classList.contains('show')));
+    if (notificationPanel.classList.contains('show')) return fetchNotifications();
 
 });
 
 notificationClose.addEventListener('click', () => {
 
     notificationPanel.classList.remove('show');
+    notificationBtn.setAttribute('aria-expanded', 'false');
 
 });
 
@@ -73,70 +115,16 @@ notificationClose.addEventListener('click', () => {
 
 if (welcomeText) {
 
-    welcomeText.innerHTML = `
-        <div style="text-align: center; padding: 10px 0;">
-
-            <span class="welcome-label" style="
-                text-transform: uppercase; 
-                letter-spacing: 3px; 
-                font-size: 11px; 
-                color: #a78bfa; 
-                font-weight: 800;
-                display: inline-block;
-                animation: pulse 2s infinite alternate;
-            ">
-                🚀 Ready to Track?
-            </span>
-
-            <h2 style="
-                font-size: 2.2rem; 
-                font-weight: 900; 
-                line-height: 1.2;
-                margin: 8px 0 12px 0;
-                background: linear-gradient(
-                    135deg,
-                    #a78bfa 0%,
-                    #38bdf8 50%,
-                    #06b6d4 100%
-                );
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-                display: block;
-                filter: drop-shadow(
-                    0px 2px 8px rgba(139, 92, 246, 0.3)
-                );
-            ">
-                Welcome, ${userName ? userName.split(' ')[0] : 'User'}!
-            </h2>
-
-            <div style="
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                background: rgba(255, 255, 255, 0.05);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                padding: 6px 14px;
-                border-radius: 999px;
-                font-size: 13px;
-                color: #cbd5e1;
-                cursor: pointer;
-                transition: all 0.3s ease;
-            "
-            onmouseover="
-                this.style.background='rgba(56, 189, 248, 0.15)';
-                this.style.borderColor='#38bdf8';
-                this.style.transform='scale(1.05)';
-            "
-            onmouseout="
-                this.style.background='rgba(255, 255, 255, 0.05)';
-                this.style.borderColor='rgba(255, 255, 255, 0.1)';
-                this.style.transform='scale(1)';
-            ">
-                <span>Let's smash some bills</span> 🔥
-            </div>
-
-        </div>
-    `;
+    const label = document.createElement('span');
+    label.className = 'welcome-label';
+    label.textContent = 'Ready to track';
+    const heading = document.createElement('h2');
+    heading.className = 'welcome-text';
+    heading.textContent = "Welcome, " + (userName || 'User') + '!';
+    const subtitle = document.createElement('p');
+    subtitle.className = 'welcome-description';
+    subtitle.textContent = 'Keep shared expenses clear and friendships simple.';
+    welcomeText.replaceChildren(label, heading, subtitle);
 
 }
 
@@ -165,6 +153,8 @@ const fetchGroups = async () => {
         );
 
         const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Unable to load groups.');
+        groupCount.textContent = response.ok && Array.isArray(data.groups) ? String(data.groups.length) : '—';
 
         groupsContainer.innerHTML = '';
 
@@ -251,66 +241,45 @@ const fetchGroups = async () => {
 
 
 
-            div.innerHTML = `
-
-                <div class="group-card-top">
-
-                    <div class="group-icon">
-                        ${icon}
-                    </div>
-
-                    <div>
-
-                        <h3>
-                            ${group.groupName}
-                        </h3>
-
-                        <p class="group-subtext">
-                            Split expenses effortlessly
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-
-                <div class="group-buttons">
-
-                    <button
-                        class="open-btn"
-
-                        onclick="openGroup(
-                            '${group._id}',
-                            '${group.groupName}'
-                        )"
-                    >
-                        Enter
-                    </button>
-
-
-
-                    <button
-                        class="delete-btn"
-
-                        onclick="deleteGroup(
-                            '${group._id}'
-                        )"
-                    >
-                        Delete
-                    </button>
-
-                </div>
-
-            `;
+            const top = document.createElement('div');
+            top.className = 'group-card-top';
+            const badge = document.createElement('div');
+            badge.className = 'group-icon';
+            badge.setAttribute('aria-hidden', 'true');
+            badge.textContent = icon;
+            const content = document.createElement('div');
+            const heading = document.createElement('h3');
+            heading.textContent = group.groupName;
+            const description = document.createElement('p');
+            description.className = 'group-subtext';
+            description.textContent = 'Shared expenses and balances';
+            content.append(heading, description);
+            top.append(badge, content);
+            const actions = document.createElement('div');
+            actions.className = 'group-buttons';
+            const open = document.createElement('button');
+            open.type = 'button';
+            open.className = 'open-btn';
+            open.textContent = 'Open Group';
+            open.setAttribute('aria-label', 'Open group ' + group.groupName);
+            open.addEventListener('click', () => openGroup(group._id, group.groupName));
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'delete-btn';
+            remove.textContent = 'Delete';
+            remove.setAttribute('aria-label', 'Delete group ' + group.groupName);
+            remove.addEventListener('click', () => deleteGroup(group._id, group.groupName));
+            actions.append(open, remove);
+            div.append(top, actions);
 
             groupsContainer.appendChild(div);
 
         });
 
     } catch (error) {
+        groupCount.textContent = '—';
 
-        console.log(error);
+        ExpenseUI.notify(error.message || 'Unable to load groups.', 'error');
 
     }
 
@@ -364,7 +333,12 @@ const formatNotificationTime = (createdAt) => {
 // FETCH NOTIFICATIONS
 // ===============================
 
-const fetchNotifications = async () => {
+const fetchNotifications = ({ force = false } = {}) => {
+    if (notificationFetch) return force ? notificationFetch.then(() => fetchNotifications()) : notificationFetch;
+    notificationFetch = loadNotifications().finally(() => { notificationFetch = null; });
+    return notificationFetch;
+};
+const loadNotifications = async () => {
 
     try {
 
@@ -383,9 +357,11 @@ const fetchNotifications = async () => {
         );
 
         const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Unable to load notifications.');
 
         const notifications =
-            data.notifications || [];
+            Array.isArray(data.notifications) ? data.notifications : [];
+        notificationData = notifications;
 
 
 
@@ -401,13 +377,7 @@ const fetchNotifications = async () => {
         // NOTIFICATION BADGE
         // ===============================
 
-        notificationBadge.textContent =
-            notifications.length;
-
-        notificationBadge.style.display =
-            notifications.length > 0
-                ? 'flex'
-                : 'none';
+        updateNotificationBadge();
 
 
 
@@ -434,6 +404,8 @@ const fetchNotifications = async () => {
         // ===============================
 
         notifications.forEach((notification) => {
+    const groupName = notification.groupId?.groupName || 'a deleted group';
+    const senderName = notification.relatedUser?.username || 'A former member';
 
     const notificationCard =
         document.createElement('div');
@@ -463,7 +435,7 @@ const fetchNotifications = async () => {
            icon = '✓';
 
         message =
-            `${notification.relatedUser.username} accepted your invite to ${notification.groupId.groupName}`;
+            `${senderName} accepted your invite to ${groupName}`;
 
 }
 
@@ -473,7 +445,7 @@ if (notification.type === 'INVITE_REJECTED') {
     icon = '×';
 
    message =
-        `${notification.relatedUser.username} rejected your invite to ${notification.groupId.groupName}`;
+        `${senderName} rejected your invite to ${groupName}`;
 
 }
 
@@ -483,66 +455,44 @@ if (notification.type === 'INVITE_RECEIVED') {
     icon = '✉';
 
     message =
-        `${notification.relatedUser.username} invited you to the group ${notification.groupId.groupName}`;
+        `${senderName} invited you to ${notification.groupId?.groupName ? `the group ${groupName}` : groupName}`;
 
 }
 
 const time =
     formatNotificationTime(notification.createdAt);
 
-    let actionButtons = '';
-
-if (notification.type === 'INVITE_RECEIVED') {
-
-    actionButtons = `
-        <div class="notification-actions">
-
-            <button
-                class="invite-accept-btn"
-                onclick="acceptInvite('${notification.inviteId._id}')"
-            >
-                Accept
-            </button>
-
-            <button
-                class="invite-reject-btn"
-                onclick="rejectInvite('${notification.inviteId._id}')"
-            >
-                Reject
-            </button>
-
-        </div>
-    `;
-
-}
-
-    notificationCard.innerHTML = `
-
-    <div class="notification-icon">
-        ${icon}
-    </div>
-
-    <div class="notification-content">
-
-        <strong>
-            ${title}
-        </strong>
-
-        <p>
-            ${message}
-        </p>
-
-        <span class="notification-time">
-            ${time}
-        </span>
-
-        ${actionButtons}
-
-    </div>
-
-`;
-
-
+    const iconElement = document.createElement('div');
+    iconElement.className = 'notification-icon';
+    iconElement.setAttribute('aria-hidden', 'true');
+    iconElement.textContent = icon;
+    const content = document.createElement('div');
+    content.className = 'notification-content';
+    const heading = document.createElement('strong');
+    heading.textContent = title;
+    const description = document.createElement('p');
+    description.textContent = message;
+    const timestamp = document.createElement('span');
+    timestamp.className = 'notification-time';
+    timestamp.textContent = time;
+    content.append(heading, description, timestamp);
+    if (pendingInvitation(notification)) {
+        const actions = document.createElement('div');
+        actions.className = 'notification-actions';
+        const accept = document.createElement('button');
+        accept.type = 'button';
+        accept.className = 'invite-accept-btn';
+        accept.textContent = 'Accept';
+        accept.addEventListener('click', () => acceptInvite(notification.inviteId._id, accept));
+        const reject = document.createElement('button');
+        reject.type = 'button';
+        reject.className = 'invite-reject-btn';
+        reject.textContent = 'Reject';
+        reject.addEventListener('click', () => rejectInvite(notification.inviteId._id, reject));
+        actions.append(accept, reject);
+        content.appendChild(actions);
+    }
+    notificationCard.append(iconElement, content);
 
             notificationList.appendChild(
                 notificationCard
@@ -551,7 +501,10 @@ if (notification.type === 'INVITE_RECEIVED') {
         });
 
 
+        await markDisplayedActivityRead(notifications);
+
     } catch (error) {
+        ExpenseUI.notify(error.message || 'Unable to load notifications.', 'error');
 
         console.log(
             'Error fetching notifications:',
@@ -578,6 +531,9 @@ if (groupForm) {
 
             e.preventDefault();
 
+            const restore = ExpenseUI.busy(groupForm.querySelector('button[type="submit"]'), 'Creating group...');
+            if (!restore) return;
+            ExpenseUI.formError(groupForm);
             const groupName =
                 groupNameInput.value.trim();
 
@@ -586,9 +542,8 @@ if (groupForm) {
             // VALIDATION
             if (!groupName) {
 
-                alert(
-                    'Please enter group name'
-                );
+                ExpenseUI.formError(groupForm, 'Please enter group name');
+                restore();
 
                 return;
 
@@ -630,7 +585,8 @@ if (groupForm) {
                 const data =
                     await response.json();
 
-                console.log(data);
+                if (!response.ok) throw new Error(data.message || 'Unable to create group.');
+                ExpenseUI.notify('Group created.', 'success');
 
 
 
@@ -640,12 +596,14 @@ if (groupForm) {
 
 
                 // REFRESH GROUPS
-                fetchGroups();
+                await fetchGroups();
 
             } catch (error) {
 
-                console.log(error);
+                ExpenseUI.formError(groupForm, error.message || 'Unable to create group.');
 
+            } finally {
+                restore();
             }
 
         }
@@ -693,60 +651,31 @@ function openGroup(
 // DELETE GROUP
 // ===============================
 
-async function deleteGroup(groupId) {
-
-    const confirmDelete = confirm(
-
-        'Are you sure you want to delete this group?'
-
-    );
-
-    if (!confirmDelete) {
-
-        return;
-
-    }
-
-
-
-    try {
-
+async function deleteGroup(groupId, groupName) {
+    const deleted = await ExpenseUI.confirmDelete(groupName || 'this group', async () => {
         const response = await fetch(
-
             `https://expenseiq-backend-xkmu.onrender.com/api/groups/delete/${groupId}`,
-
-            {
-                method: 'DELETE',
-
-                headers: {
-                    authorization: token
-                }
-            }
-
+            { method: 'DELETE', headers: { authorization: token } }
         );
-
-        const data =
-            await response.json();
-
-        console.log(data);
-
-
-
-        fetchGroups();
-
-    } catch (error) {
-
-        console.log(error);
-
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message || 'Unable to delete group.');
+    });
+    if (deleted) {
+        ExpenseUI.notify('Group deleted.', 'success');
+        await fetchGroups();
+        document.getElementById('groupName').focus();
     }
-
 }
 
 // ===============================
 // ACCEPT INVITATION
 // ===============================
 
-async function acceptInvite(inviteId) {
+const pendingInvites = new Set();
+async function acceptInvite(inviteId, button) {
+    if (pendingInvites.has(inviteId)) return;
+    pendingInvites.add(inviteId);
+    const restore = button ? ExpenseUI.busy(button, 'Accepting...') : null;
 
     try {
 
@@ -767,17 +696,15 @@ async function acceptInvite(inviteId) {
 
         if (!response.ok) {
 
-            alert(
-                data.message ||
-                'Failed to accept invitation'
-            );
+            ExpenseUI.notify(data.message || 'Failed to accept invitation', 'error');
 
             return;
         }
 
         notificationPanel.classList.remove('show');
+    notificationBtn.setAttribute('aria-expanded', 'false');
 
-        await fetchNotifications();
+        await fetchNotifications({ force: true });
 
         await fetchGroups();
 
@@ -788,6 +715,10 @@ async function acceptInvite(inviteId) {
             error
         );
 
+        ExpenseUI.notify(error.message || 'Unable to update invitation.', 'error');
+    } finally {
+        pendingInvites.delete(inviteId);
+        restore?.();
     }
 
 }
@@ -796,7 +727,10 @@ async function acceptInvite(inviteId) {
 // REJECT INVITATION
 // ===============================
 
-async function rejectInvite(inviteId) {
+async function rejectInvite(inviteId, button) {
+    if (pendingInvites.has(inviteId)) return;
+    pendingInvites.add(inviteId);
+    const restore = button ? ExpenseUI.busy(button, 'Rejecting...') : null;
 
     try {
 
@@ -817,15 +751,12 @@ async function rejectInvite(inviteId) {
 
         if (!response.ok) {
 
-            alert(
-                data.message ||
-                'Failed to reject invitation'
-            );
+            ExpenseUI.notify(data.message || 'Failed to reject invitation', 'error');
 
             return;
         }
 
-        await fetchNotifications();
+        await fetchNotifications({ force: true });
 
     } catch (error) {
 
@@ -834,6 +765,10 @@ async function rejectInvite(inviteId) {
             error
         );
 
+        ExpenseUI.notify(error.message || 'Unable to update invitation.', 'error');
+    } finally {
+        pendingInvites.delete(inviteId);
+        restore?.();
     }
 
 }

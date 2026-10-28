@@ -16,19 +16,19 @@
 
 </head>
 
-<body>
+<body class="auth-page">
 
     <!-- BACKGROUND GRID -->
-    <div class="bg-grid"></div>
+    <div class="bg-grid" aria-hidden="true"></div>
 
     <!-- BIG BACKGROUND TEXT -->
-    <div class="bg-text">
+    <div class="bg-text" aria-hidden="true">
         ExpenseIQ
     </div>
 
     <!-- LOGO -->
-    <header class="logo-header" style="display: flex; justify-content: center; width: 100%; margin-bottom: 20px;">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="180" height="45">
+    <header class="logo-header">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="180" height="45" role="img" aria-label="ExpenseIQ">
           <defs>
             <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stop-color="#3b82f6" />
@@ -48,7 +48,7 @@
 
 
     <!-- MAIN CONTAINER -->
-    <div class="login-container">
+    <main class="login-container">
 
 
         <!-- LEFT SIDE -->
@@ -75,21 +75,32 @@
             <div class="login-card">
 
                 <h2>
-                    //Login
+                    Welcome back
                 </h2>
 
+                <p class="auth-description">Sign in to manage your shared expenses.</p>
                 <form id="loginForm">
+
+                    <label for="loginInput">Username or email</label>
 
                     <input
                          type="text"
                          id="loginInput"
+                         name="username"
+                         autocomplete="username"
+                         autocapitalize="none"
+                         spellcheck="false"
                          placeholder="Enter Username or Email"
                          required
                     >
 
+                    <label for="password">Password</label>
+
                     <input
                         type="password"
                         id="password"
+                        name="password"
+                        autocomplete="current-password"
                         placeholder="Enter Password"
                         required
                     >
@@ -100,11 +111,11 @@
 
                 </form>
 
-                <p>
-                    Don't have an account ?
+                <p class="auth-switch">
+                    Don't have an account?
 
                     <a href="./signup.html">
-                        Signup
+                        Sign up
                     </a>
                 </p>
 
@@ -112,8 +123,7 @@
 
         </div>
 
-    </div>
-
+    </main>
 
     <!-- FOOTER -->
     <footer class="footer">
@@ -123,6 +133,7 @@
 
     </footer>
 
+    <script src="./js/feedback.js"></script>
     <script src="./js/login.js"></script>
 
 </body>
