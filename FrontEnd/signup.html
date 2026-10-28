@@ -2,55 +2,110 @@
 <html lang="en">
 
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>ExpenseIQ Signup</title>
 
     <link rel="stylesheet" href="./css/style.css">
+
 </head>
 
-<body>
+<body class="auth-page">
 
-    <div class="container">
+    <!-- BACKGROUND GRID -->
+    <div class="bg-grid" aria-hidden="true"></div>
 
-        <h1>Signup</h1>
-
-        <form id="signupForm">
-
-            <input
-                type="text"
-                id="username"
-                placeholder="Enter Username"
-                required
-            >
-
-            <input
-                type="email"
-                id="email"
-                placeholder="Enter Email"
-                required
-            >
-
-            <input
-                type="password"
-                id="password"
-                placeholder="Enter Password"
-                required
-            >
-
-            <button type="submit">
-                Signup
-            </button>
-
-        </form>
-
-        <p>
-            Already have an account?
-            <a href="./login.html">Login</a>
-        </p>
-
+    <!-- BIG BACKGROUND TEXT -->
+    <div class="bg-text" aria-hidden="true">
+        ExpenseIQ
     </div>
 
+    <!-- LOGO -->
+    <header class="logo-header">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 60" width="180" height="45" role="img" aria-label="ExpenseIQ">
+          <defs>
+            <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3b82f6" />
+              <stop offset="100%" stop-color="#06b6d4" />
+            </linearGradient>
+          </defs>
+          <g transform="translate(10, 10)">
+            <path d="M0,10 Q20,0 40,10 L40,30 Q20,45 0,30 Z" fill="url(#logoGrad)" opacity="0.15"/>
+            <rect x="8" y="28" width="6" height="12" rx="2" fill="url(#logoGrad)" />
+            <rect x="18" y="18" width="6" height="22" rx="2" fill="url(#logoGrad)" />
+            <rect x="28" y="8" width="6" height="32" rx="2" fill="url(#logoGrad)" />
+            <circle cx="31" cy="8" r="4" fill="#ffffff" />
+          </g>
+          <text x="65" y="38" font-family="Arial, sans-serif" font-weight="800" font-size="24" fill="#ffffff" letter-spacing="0.5">Expense<tspan fill="url(#logoGrad)">IQ</tspan></text>
+        </svg>
+    </header>
+
+
+    <!-- MAIN CONTAINER -->
+    <main class="login-container">
+
+
+        <!-- LEFT SIDE -->
+        <div class="brand-section">
+
+            <h1>
+                Track Smarter.
+                <br>
+                Spend Wiser.
+            </h1>
+
+            <p>
+                Use ExpenseIQ to effortlessly monitor
+                your expenses, manage groups,
+                and achieve your financial goals.
+            </p>
+
+        </div>
+
+
+        <!-- RIGHT SIDE -->
+        <div class="form-section">
+
+            <div class="login-card">
+
+                <h2>
+                    Create your account
+                </h2>
+
+                <p class="auth-description">Start sharing expenses with clarity.</p>
+                <form id="signupForm">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email" autocapitalize="none" spellcheck="false" required>
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Choose a password" autocomplete="new-password" required>
+                    <button type="submit">Create account</button>
+                </form>
+
+                <p class="auth-switch">Already have an account? <a href="./login.html">Log in</a></p>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+
+        © 2026 ExpenseIQ.
+        All rights reserved.
+
+    </footer>
+
+    <script src="./js/feedback.js"></script>
     <script src="./js/signup.js"></script>
 
 </body>
