@@ -123,7 +123,7 @@ if (welcomeText) {
     heading.textContent = "Welcome, " + (userName || 'User') + '!';
     const subtitle = document.createElement('p');
     subtitle.className = 'welcome-description';
-    subtitle.textContent = 'Keep shared expenses clear and friendships simple.';
+    subtitle.textContent = 'Keep every shared expense organized, transparent, and easy to manage.';
     welcomeText.replaceChildren(label, heading, subtitle);
 
 }
