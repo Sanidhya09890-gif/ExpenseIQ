@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
+    <title>Verify Email | ExpenseIQ</title>
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body class="auth-page verification-page">
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-text" aria-hidden="true">ExpenseIQ</div>
+    <header class="logo-header"><a class="verification-brand" href="./login.html" aria-label="ExpenseIQ login">Expense<span>IQ</span></a></header>
+    <main class="login-container">
+        <div class="brand-section">
+            <h1>One small step.<br>A safer start.</h1>
+            <p>Confirm your email before creating your ExpenseIQ account.</p>
+        </div>
+        <section class="form-section" aria-labelledby="verificationHeading">
+            <div class="login-card">
+                <h2 id="verificationHeading">Verify your email</h2>
+                <p class="auth-description">Enter the six-digit code sent to the email address you used to sign up. Check your spam folder too.</p>
+                <p id="verificationStatus" class="verification-status" role="status" aria-live="polite"></p>
+                <form id="verifyEmailForm">
+                    <label for="otp">Verification code</label>
+                    <input id="otp" class="otp-input" type="text" name="otp" inputmode="numeric" autocomplete="one-time-code"
+                        pattern="[0-9]{6}" minlength="6" maxlength="6" placeholder="000000" required
+                        aria-describedby="otpHelp otpExpiry" spellcheck="false" autocapitalize="none">
+                    <p id="otpHelp" class="verification-help">Enter all six digits, including any leading zeroes. Never share this code.</p>
+                    <p id="otpExpiry" class="verification-timer" aria-live="off">Checking code expiry…</p>
+                    <button id="verifyEmailButton" type="submit" disabled>Verify email</button>
+                </form>
+                <div class="verification-resend">
+                    <button id="resendCode" class="verification-resend-button" type="button" disabled>Resend code</button>
+                    <span id="resendCountdown" class="verification-timer" aria-live="off">Checking resend availability…</span>
+                </div>
+                <p class="auth-switch">Already verified or have an existing account? <a href="./login.html">Log in</a></p>
+                <p class="auth-switch"><a href="./signup.html">Back to signup</a></p>
+                <noscript><p class="form-feedback">JavaScript is required for email verification. Existing accounts can still use the login page.</p></noscript>
+            </div>
+        </section>
+    </main>
+    <footer class="footer">© 2026 ExpenseIQ. All rights reserved.</footer>
+    <script src="./js/feedback.js"></script>
+    <script src="./js/signup-verification-state.js"></script>
+    <script src="./js/verify-email.js"></script>
+</body>
+</html>
