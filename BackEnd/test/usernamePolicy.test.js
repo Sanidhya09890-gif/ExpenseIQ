@@ -48,13 +48,13 @@ test('readiness matcher accepts only the exact approved partial policy with simp
     }
 });
 test('OTP readiness accepts approved partial index and rejects the old full index before writes', async () => {
-    const email = { key: { email: 1 }, unique: true };
-    const ttl = { key: { purgeAt: 1 }, expireAfterSeconds: 0 };
+    const email = { name: 'email_1', key: { email: 1 }, unique: true };
+    const ttl = { name: 'pending_registration_cleanup', key: { purgeAt: 1 }, expireAfterSeconds: 0 };
     for (const index of [specification(), { key: { username: 1 }, name: 'username_1', unique: true }]) {
         let checks = 0, limits = 0;
         const service = createService({
-            Pending: { collection: { indexes: async () => [email, ttl] } },
-            Limits: { collection: { indexes: async () => [ttl] } },
+            Pending: { collection: { indexes: async () => [{ ...email, name: 'unique_pending_registration_email' }, ttl] } },
+            Limits: { collection: { indexes: async () => [{ ...ttl, name: 'signup_limit_cleanup' }] } },
             Users: { collection: { indexes: async () => [email, index] }, findOne: async () => ({ _id: 'existing' }) },
             transactions: { inspectTopology: async () => checks++ },
             config: () => ({ secret: 'mock-only' }), consume: async () => limits++,

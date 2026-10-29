@@ -10,7 +10,7 @@ const mail = require('./signupEmail');
 const rate = require('./signupRateLimiter');
 const security = require('./signupOtpSecurity');
 const { SignupError, tokenDigest, otpDigest, equalDigest } = security;
-const { approvedUsernameIndex } = require('../utils/usernamePolicy');
+const { validatePrerequisites } = require('./signupPrerequisites');
 const FIVE_MINUTES = 300000, COOLDOWN = 120000, LIFETIME = 86400000;
 const privateFields = '+passwordHash +tokenDigest +otpDigest';
 const unavailable = () => new SignupError(400, 'REGISTRATION_UNAVAILABLE', 'This registration cannot be completed. Sign in or try a new registration later.');
@@ -19,22 +19,7 @@ const escapeRegex = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 function createService({ Pending = PendingModel, Users = UserModel, Limits = LimitModel, transactions = tx,
     sendEmail = payload => mail.sendSignupOtp(payload), consume = (...args) => rate.consume(...args),
     config = () => security.configuration(), now = () => Date.now(), makeOtp = security.generateOtp } = {}) {
-    async function ready() {
-        const settings = config();
-        // Fail closed until explicitly provisioned; never create indexes on requests.
-        const pendingIndexes = await Pending.collection.indexes();
-        const limitIndexes = await Limits.collection.indexes();
-        const userIndexes = await Users.collection.indexes();
-        const unique = (indexes, field) => indexes.some(i => i.unique === true && !i.partialFilterExpression && !i.sparse &&
-            Object.keys(i.key).length === 1 && i.key[field] === 1);
-        if (!unique(pendingIndexes, 'email') || !unique(userIndexes, 'email') || !userIndexes.some(approvedUsernameIndex) ||
-            !pendingIndexes.some(i => i.key.purgeAt === 1 && i.expireAfterSeconds === 0) ||
-            !limitIndexes.some(i => i.key.purgeAt === 1 && i.expireAfterSeconds === 0)) {
-            throw new SignupError(503, 'SIGNUP_UNAVAILABLE', 'Email verification is temporarily unavailable.');
-        }
-        await transactions.inspectTopology();
-        return settings;
-    }
+    const ready = () => validatePrerequisites({ Pending, Users, Limits, transactions, config });
     async function throttle(secret, action, identity, ip) {
         // The HTTP controller supplies the canonical identity from Express's
         // explicitly trusted-peer policy; never parse client headers here.

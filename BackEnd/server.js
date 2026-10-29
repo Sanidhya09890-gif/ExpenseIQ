@@ -16,6 +16,18 @@ const startServer = async () => {
     try {
 
         await connectDB();
+        if (process.env.SIGNUP_EMAIL_OTP_ENABLED === 'true') {
+            try {
+                await require('./src/services/signupPrerequisites').validatePrerequisites();
+                console.log('OTP prerequisites: PASS');
+            } catch {
+                console.error('OTP prerequisites: FAIL');
+                try { await mongoose.disconnect(); } catch { /* No raw errors or secrets. */ }
+                process.exitCode = 1;
+                return;
+            }
+        }
+
 
         const port = Number(process.env.PORT) || 3000;
         const server = app.listen(port, () => {

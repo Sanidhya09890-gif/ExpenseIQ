@@ -196,3 +196,23 @@ Ordinary suite: `node --test BackEnd/test/*.test.js FrontEnd/test/*.test.js`.
 Isolated, opt-in OTP database suite:
 `node --test BackEnd/test/signupOtp.integration.test.js`.
 The latter creates test-only collections/indexes/fixtures and cleans them up.
+
+## Startup prerequisite gate
+
+When OTP is exactly enabled, the server runs the same read-only prerequisite
+validator used by signup before listening for HTTP. It validates HMAC/provider
+configuration, rate policy, exact required index specifications and transaction
+topology. Missing collections fail index inspection; nothing is auto-provisioned.
+Only a fixed OTP prerequisites: PASS or OTP prerequisites: FAIL result is logged.
+Failure disconnects MongoDB, exits nonzero and never starts HTTP. Disabled OTP
+skips the check. /readyz retains its existing basic health contract.
+
+Keep maintenance enabled during deployment. In Render Free logs, confirm the
+PASS result followed by normal listener startup and a successful /readyz check.
+Confirm the protected signup endpoints still return maintenance responses. This
+checks local configuration and database prerequisites, not Brevo key validity,
+sender authorization, quota, delivery or transaction execution permissions. A
+separately approved controlled signup is still needed after maintenance removal.
+Do not rotate the OTP HMAC secret during pending registrations. On failure keep
+maintenance enabled and correct configuration/index prerequisites; do not disable
+OTP and reopen unverified registration as an automatic recovery.
