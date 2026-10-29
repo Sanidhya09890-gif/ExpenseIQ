@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const maintenanceWriteGuard = require('./middleware/maintenance.middleware');
+const { trustedProxyPolicy, corsOptions } = require('./Config/httpSecurity');
 
 const authRoutes = require('./routes/auth.routes');
 
@@ -13,7 +14,8 @@ const notificationRoutes = require('./routes/notification.routes');
 
 const app = express();
 
-app.use(cors());
+app.set('trust proxy', trustedProxyPolicy());
+app.use(cors(corsOptions()));
 app.get('/readyz', (req, res) => {
     const ready = !app.locals.shuttingDown && mongoose.connection.readyState === 1;
     res.set('Cache-Control', 'no-store');

@@ -3,14 +3,21 @@ const User = require('../models/user.model');
 const bcrypt = require('bcryptjs');
 
 const jwt = require('jsonwebtoken');
+const { validUsername } = require('../utils/usernamePolicy');
 
 
 // SIGNUP
 exports.signup = async (req, res) => {
+    if (process.env.SIGNUP_EMAIL_OTP_ENABLED === 'true') {
+        return require('./signupVerification.controller').start(req, res);
+    }
 
     try {
 
         const { username, email, password } = req.body;
+        if (!validUsername(username)) {
+            return res.status(400).json({ message: 'Username must contain 3–40 letters, numbers, underscores, dots or hyphens' });
+        }
         //email already exists?
         const existingUser = await User.findOne({ email });
 
@@ -46,6 +53,9 @@ exports.signup = async (req, res) => {
         });
 
     } catch (error) {
+        if (error.code === 11000) {
+            return res.status(400).json({ message: 'Username or email is already registered' });
+        }
 
         res.status(500).json({
             message: error.message

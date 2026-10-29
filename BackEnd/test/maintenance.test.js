@@ -29,7 +29,8 @@ test('maintenance blocks actual mounted write routes before their handlers', asy
     const url = await listen(t, app);
     for (const path of ['/api/groups/create', '/api/groups/g/invite', '/api/groups/g/leave',
         '/api/groups/g/members/m', '/api/groups/invites/i/accept', '/api/groups/invites/i/reject',
-        '/api/groups/delete/g', '/api/expenses/add', '/api/auth/signup', '/api/notifications/read']) {
+        '/api/groups/delete/g', '/api/expenses/add', '/api/auth/signup', '/api/auth/signup/verify',
+        '/api/auth/signup/resend', '/api/notifications/read']) {
         for (const method of ['POST', 'PUT', 'PATCH', 'DELETE']) {
             const response = await fetch(url + path, { method });
             assert.equal(response.status, 503, `${method} ${path}`);
@@ -41,7 +42,7 @@ test('maintenance blocks actual mounted write routes before their handlers', asy
     assert.equal((await fetch(url + '/api/auth/signup', { method: 'POST',
         headers: { 'Content-Type': 'application/json' }, body: '{' })).status, 503);
     assert.equal((await fetch(url + '/api/groups', { method: 'OPTIONS',
-        headers: { Origin: 'https://example.test', 'Access-Control-Request-Method': 'POST' } })).status, 204);
+        headers: { Origin: 'https://expenseiq-tracker-app.netlify.app', 'Access-Control-Request-Method': 'POST' } })).status, 204);
     assert.equal((await fetch(url + '/api/groups')).status, 401);
 });
 

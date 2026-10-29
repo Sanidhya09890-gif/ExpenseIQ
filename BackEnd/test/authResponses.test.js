@@ -44,3 +44,25 @@ test('invalid login does not expose stored password or internal user fields', as
     const response = await request(login, { loginInput: 'Owner', password: 'incorrect' });
     assert.equal(response.status, 400); assert.deepEqual(Object.keys(response.body), ['message']);
 });
+
+for (const status of [undefined, 'legacy', 'legacy_unverified']) {
+    test(`OTP-enabled rollout preserves password login for legacy account (${status || 'missing metadata'}) without modifying it`, async t => {
+        const previous = process.env.SIGNUP_EMAIL_OTP_ENABLED;
+        process.env.SIGNUP_EMAIL_OTP_ENABLED = 'true';
+        t.after(() => {
+            if (previous === undefined) delete process.env.SIGNUP_EMAIL_OTP_ENABLED;
+            else process.env.SIGNUP_EMAIL_OTP_ENABLED = previous;
+        });
+        const account = { ...storedUser, email: 'inaccessible@example.invalid', emailVerifiedAt: null };
+        if (status) account.emailVerificationStatus = status;
+        const before = structuredClone(account);
+        t.mock.method(User, 'findOne', async () => account);
+        t.mock.method(User, 'create', async () => assert.fail('Login must not recreate accounts'));
+        t.mock.method(User, 'updateOne', async () => assert.fail('Login must not mark ownership verified'));
+        t.mock.method(bcrypt, 'compare', async () => true);
+        t.mock.method(jwt, 'sign', payload => { assert.equal(payload.id, storedUser._id); return 'test-jwt'; });
+        const result = await request(login, { loginInput: account.username, password: 'test-password' });
+        assert.equal(result.status, 200); assert.equal(result.body.user._id, storedUser._id);
+        assert.deepEqual(account, before);
+    });
+}
