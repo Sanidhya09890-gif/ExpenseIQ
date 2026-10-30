@@ -386,6 +386,12 @@ button:disabled { cursor: not-allowed; }
 .auth-page form { display: flex; flex-direction: column; }
 .auth-page form label { font-size: 14px; font-weight: 500; line-height: 1.4; color: #cbd5e1; margin-bottom: 8px; }
 .auth-page form input { min-width: 0; min-height: 48px; padding: 12px 14px; border-radius: 12px; margin-bottom: 18px; }
+.auth-page .password-field { position: relative; width: 100%; margin-bottom: 18px; }
+.auth-page .password-field input { width: 100%; margin-bottom: 0; padding-right: 50px; }
+.auth-page .password-toggle { position: absolute; top: 50%; right: 8px; display: grid; place-items: center; width: 36px; min-height: 36px; padding: 7px; transform: translateY(-50%); border: 0; border-radius: 9px; color: #94a3b8; background: transparent; transition: color 180ms ease, background-color 180ms ease, box-shadow 180ms ease; }
+.auth-page .password-toggle:hover { transform: translateY(-50%); color: #67e8f9; background: rgba(6, 182, 212, 0.08); box-shadow: 0 0 12px rgba(34, 211, 238, 0.12); }
+.auth-page .password-toggle svg { display: block; width: 20px; height: 20px; }
+.auth-page .password-toggle [hidden] { display: none; }
 .auth-page form button[type="submit"] { width: 100%; min-height: 48px; margin-top: 6px; padding: 12px 16px; color: #F1F5FF; background: linear-gradient(110deg, #0e7490, #2563c9); font-size: 16px; }
 .auth-page .auth-switch { margin-top: 22px; padding: 12px 16px; color: #94a3b8; background: linear-gradient(135deg, rgba(15, 23, 42, 0.72), rgba(30, 27, 75, 0.24)); border: 1px solid rgba(148, 163, 184, 0.14); border-radius: 14px; font-size: 14px; line-height: 1.6; text-align: center; }
 .auth-page .auth-switch a { display: inline-block; margin-left: 4px; color: #67e8f9; font-weight: 600; text-decoration: none; transition: color 180ms ease, text-shadow 180ms ease; }
