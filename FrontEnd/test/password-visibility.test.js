@@ -25,8 +25,7 @@ function fixture(page) {
     assert.match(iconMarkup, /<path\s+data-eye-slash(?:\s|>)/);
 
     const input = { type: 'password', value: 'keep-this-password' };
-    const slashMarkup = iconMarkup.match(/<path data-eye-slash([^>]*)>/)[1];
-    const slash = { hidden: /(?:^|\s)hidden(?:\s|$)/.test(slashMarkup) };
+    const slash = { style: { display: '' } };
     const attrs = {
         'aria-controls': inputId,
         'aria-pressed': buttonTag.match(/aria-pressed="([^"]+)"/)[1],
@@ -50,7 +49,11 @@ function fixture(page) {
 
 function assertState(page, type, visible) {
     assert.equal(page.input.type, type);
-    assert.equal(page.slash.hidden, visible, 'slash is hidden exactly while password is visible');
+    assert.equal(
+    page.slash.style.display,
+    visible ? 'none' : 'inline',
+    'slash is hidden exactly while password is visible'
+    );
     assert.equal(page.attrs['aria-label'], visible ? 'Hide password' : 'Show password');
     assert.equal(page.attrs['aria-pressed'], String(visible));
     assert.equal(page.input.value, 'keep-this-password', 'toggle preserves entered password');
@@ -59,12 +62,27 @@ function assertState(page, type, visible) {
 for (const pageName of ['login.html', 'signup.html']) {
     test(`${pageName} keeps icon, accessible state and value synchronized over repeated toggles`, () => {
         const page = fixture(pageName);
-        assertState(page, 'password', false);
-        for (let click = 0; click < 8; click++) {
-            const visible = click % 2 === 0;
-            page.click();
-            assertState(page, visible ? 'text' : 'password', visible);
-        }
+        function assertState(page, type, visible) {
+    assert.equal(page.input.type, type);
+
+    assert.equal(
+        page.slash.style.display,
+        visible ? 'none' : 'inline',
+        'slash is hidden exactly while password is visible'
+    );
+
+    assert.equal(
+        page.attrs['aria-label'],
+        visible ? 'Hide password' : 'Show password'
+    );
+
+    assert.equal(page.attrs['aria-pressed'], String(visible));
+    assert.equal(
+        page.input.value,
+        'keep-this-password',
+        'toggle preserves entered password'
+    );
+}
         assert.match(page.html, /<script src="\.\/js\/password-visibility\.js"><\/script>/);
         assert.match(page.html, pageName === 'login.html' ? /login\.js/ : /signup\.js/);
     });

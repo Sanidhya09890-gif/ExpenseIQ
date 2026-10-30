@@ -7,7 +7,7 @@ document.querySelectorAll('.password-toggle').forEach(button => {
 
     function updateState() {
         const isVisible = input.type === 'text';
-        slash.hidden = isVisible;
+        slash.style.display = isVisible ? 'none' : 'inline';
         button.setAttribute('aria-label', isVisible ? 'Hide password' : 'Show password');
         button.setAttribute('aria-pressed', String(isVisible));
     }
